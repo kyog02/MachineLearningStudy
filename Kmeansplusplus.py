@@ -30,6 +30,10 @@ def plotProgress(X, centroids, idx=np.ones(X.shape[0],dtype=float)):
 
 #====================================================================================
 
+# 中心とそのほかすべてのデータ点の距離を算出
+def distance(a,b):
+    return np.sum(np.square(b-a),axis=1)
+
 # 最初は重心(centroid)をランダムに決める
 # 注意：ランダム初期化によって、収束する箇所が決まるため、50 - 1000回程度ランダム初期化して、最も多く同じ収束箇所にとどまったパターンを採用する。
 #      これはクラスタ数(K)が少ない場合に有効。クラスタ数が何百となる場合は1回でほぼ大域的最小値付近に落ちてくれる。
@@ -37,10 +41,23 @@ def plotProgress(X, centroids, idx=np.ones(X.shape[0],dtype=float)):
 # K:重心の数(クラスタを何個に分けるか)
 def InitCentroids(X, K):
     m, n = X.shape
-    idx = np.random.permutation(np.arange(m)) # np.arrangeは0 - mの値を順番に生成する。0,1,2,3,4,5...のように。整数。それをランダムに並べて変数にコピーする。
-    centroids = X[idx[:K],:] # idx(m個の配列)から最初～K個までの要素を取得する。
-    return centroids
+    centroids_idx = []
+    idx = np.random.randint(m)
+    centroids_idx.append(idx)
+    closest_distance = distance(X[idx],X)
+    l = np.sum(closest_distance)
+    for i in range(1,k):
+        # ルーレット選択を用いて確率的に新しいサンプルを取得
+        rand_val = np.random.random_sample() * l  # numpy.random.random_sample(): 0.0以上、1.0未満
+        idx = np.searchsorted(np.cumsum(closest_distance),rand_val)
+        centroids_idx.append(idx)
+        # 近傍距離をアップデート
+        new_distance = distance(X[idx],X)
+        closest_distance = np.maximum(closest_distance,new_distance)
+        l = np.sum(closest_distance)
 
+    centroids = X[centroids_idx]   
+    return centroids
 
 # 目的関数に近いイメージ
 # 各訓練例に対して最も近い重心を探す
@@ -69,13 +86,12 @@ def computeClusterMeans(X, idx):
     return clusterMeans[~np.isnan(clusterMeans).any(axis=1)] #nanを含む行は除外して返す
 
 
-# クラスタの数はエルボー法で決める。⇒入力データの分布に違和感がある箇所を重心に設定する。
-# ⇒あまり有効だと思われていないようだ。。未実装
-centroids = InitCentroids(X, 3) # 第二引数は重心(クラスタ)の数
+k = 3
+centroids = InitCentroids(X, k) # 第二引数は重心(クラスタ)の数
 idx = findClosestCentroids(X, centroids)
 plotProgress(X,centroids,idx)
 for i in range(1,6):
     centroids = computeClusterMeans(X, idx)
     idx = findClosestCentroids(X, centroids)
-    plotProgress(X,centroids,idx)
+    #plotProgress(X,centroids,idx)
 
