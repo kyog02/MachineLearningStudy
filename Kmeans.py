@@ -3,9 +3,9 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 
-font_path = '/usr/share/fonts/truetype/takao-gothic/TakaoPGothic.ttf'
-font_prop = FontProperties(fname=font_path)
-matplotlib.rcParams['font.family'] = font_prop.get_name()
+# font_path = '/usr/share/fonts/truetype/takao-gothic/TakaoPGothic.ttf'
+# font_prop = FontProperties(fname=font_path)
+# matplotlib.rcParams['font.family'] = font_prop.get_name()
 # K-means
 # 未実装だが、k-means++について
 # K-meansは重心の位置をランダムに設定するが、k-means++は違う
@@ -40,7 +40,6 @@ def InitCentroids(X, K):
     idx = np.random.permutation(np.arange(m)) # np.arrangeは0 - mの値を順番に生成する。0,1,2,3,4,5...のように。整数。それをランダムに並べて変数にコピーする。
     centroids = X[idx[:K],:] # idx(m個の配列)から最初～K個までの要素を取得する。
     return centroids
-
 
 # 目的関数に近いイメージ
 # 各訓練例に対して最も近い重心を探す
